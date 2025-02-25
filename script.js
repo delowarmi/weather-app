@@ -1,153 +1,90 @@
-// select dom
-const cityNameElement = document.querySelector("#cityName");
-const cityCodeElement = document.querySelector("#cityCode");
-const localDateElement = document.querySelector("#localDate");
-const localTimeElement = document.querySelector("#localTime");
-const weatherImgElement = document.querySelector("#weather_img");
-const mainTemperatureElement = document.querySelector("#mainTemperature");
-const tempDescriptionElement = document.querySelector("#tempDescription");
-const celsiusElement = document.querySelector("#celsius");
-const fahrenheitElement = document.querySelector("#fahrenheit");
-const humidityElement = document.querySelector("#humidity");
-const windElement = document.querySelector("#wind");
-const pressureElement = document.querySelector("#pressure");
-const feelLikeElement = document.querySelector("#feelLike");
-const queryElement = document.querySelector("#query");
-const searchElement = document.querySelector("#search");
+// Select DOM elements
+const $ = (id) => document.querySelector(id);
+const cityNameEl = $("#cityName"),
+  cityCodeEl = $("#cityCode"),
+  localDateEl = $("#localDate"),
+  localTimeEl = $("#localTime"),
+  weatherImgEl = $("#weather_img"),
+  mainTempEl = $("#mainTemperature"),
+  tempDescEl = $("#tempDescription"),
+  celsiusEl = $("#celsius"),
+  fahrenheitEl = $("#fahrenheit"),
+  humidityEl = $("#humidity"),
+  windEl = $("#wind"),
+  pressureEl = $("#pressure"),
+  feelLikeEl = $("#feelLike"),
+  queryEl = $("#query"),
+  searchEl = $("#search");
 
-// initial data
 const apiKey = "126688fe7925400d81763c4bb6265bba";
-let cityName = "Dhaka";
-const dayList = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
-let monthList = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-// allow to get your location weather
+let cityName = "Dhaka",
+  dayList = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+  monthList = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+// Fetch weather data
+const fetchWeather = async (lat = "", lon = "", city = cityName) => {
+  let res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&q=${city}&units=imperial&appid=${apiKey}`);
+  return res.json();
+};
+
+// Display weather data
+const displayWeather = async (lat, lon, city) => {
+  let data = await fetchWeather(lat, lon, city);
+  cityCodeEl.innerText = data.sys.country;
+  cityNameEl.innerText = data.name === "Sāmāir" ? "Dhaka" : data.name;
+  humidityEl.innerText = data.main.humidity;
+  windEl.innerText = data.wind.speed;
+  pressureEl.innerText = data.main.pressure;
+  tempDescEl.innerText = data.weather[0].description;
+  weatherImgEl.src = `http://openweathermap.org/img/w/${data.weather[0].icon}.png`;
+
+  const updateTemp = (isCelsius) => {
+    feelLikeEl.innerText = Math.round(isCelsius ? (data.main.feels_like - 32) * 0.5556 : data.main.feels_like);
+    mainTempEl.innerText = Math.round(isCelsius ? (data.main.temp - 32) * 0.5556 : data.main.temp);
+    celsiusEl.classList.toggle("active", isCelsius);
+    fahrenheitEl.classList.toggle("active", !isCelsius);
+  };
+
+  fahrenheitEl.onclick = () => updateTemp(false);
+  celsiusEl.onclick = () => updateTemp(true);
+  updateTemp(true);
+};
+
+// Get location and fetch weather
 window.onload = () => {
   navigator.geolocation.getCurrentPosition(
-    (success) => {
-      let lat = success.coords.latitude;
-      let lon = success.coords.longitude;
-      waitForResponse(lat, lon, "", apiKey).catch((err) => err);
-    },
-    function errorCallback(error) {
-      if (error.code == error.PERMISSION_DENIED) {
-        waitForResponse("", "", cityName, apiKey).catch((err) => err);
-      }
-    }
+    ({ coords }) => displayWeather(coords.latitude, coords.longitude, ""),
+    () => displayWeather("", "", cityName)
   );
 };
-// search weather
-searchElement.addEventListener("click", function (e) {
+
+// Search weather
+searchEl.onclick = (e) => {
   e.preventDefault();
-  if (queryElement.value) {
-    cityName = queryElement.value;
-    queryElement.value = "";
-    waitForResponse("", "", cityName, apiKey).catch((err) => {
-      queryElement.placeholder = "not a valid country or city name";
-      queryElement.classList.add("error");
+  if (queryEl.value) {
+    cityName = queryEl.value;
+    queryEl.value = "";
+    displayWeather("", "", cityName).catch(() => {
+      queryEl.placeholder = "Not a valid city name";
+      queryEl.classList.add("error");
       setTimeout(() => {
-        queryElement.placeholder = "search by city name";
-        queryElement.classList.remove("error");
+        queryEl.placeholder = "Search by city name";
+        queryEl.classList.remove("error");
       }, 2000);
     });
   } else {
-    queryElement.placeholder = "please enter a valid city name";
-    queryElement.classList.add("error");
-    if (queryElement.classList.contains("error")) {
-      setTimeout(() => {
-        queryElement.placeholder = "search by city name";
-        queryElement.classList.remove("error");
-      }, 2000);
-    }
+    queryEl.placeholder = "Enter a valid city name";
+    queryEl.classList.add("error");
+    setTimeout(() => {
+      queryEl.placeholder = "Search by city name";
+      queryEl.classList.remove("error");
+    }, 2000);
   }
-});
-// get time and date
-const setTimeAndDate = () => {
-  let dateObj = new Date();
-  let day = dayList[dateObj.getDay()];
-  let month = monthList[dateObj.getMonth()];
-  let date =
-    dateObj.getDate() < 10 ? `0${dateObj.getDate()}` : dateObj.getDate();
-  let year = dateObj.getFullYear();
-  localDateElement.innerHTML = `${day} ${month} ${date} ${year}`;
-  return function setTime() {
-    let hour = dateObj.getHours() % 12 === 0 ? "12" : dateObj.getHours() % 12;
-    let minute = dateObj.getMinutes();
-    let seconds = dateObj.getSeconds();
-    let am_pm = hour > 12 ? "am" : "pm";
-    return (localTimeElement.innerHTML = `${hour}:${minute}:${seconds} ${am_pm}`);
-  };
-};
-// set time
-setInterval(() => {
-  setTimeAndDate()();
-}, 1000);
-// call api
-let linkApi = async (lat, lon, cityName, apiKey) => {
-  let response = await fetch(
-    `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&q=${cityName}&units=imperial&appid=${apiKey}`
-  );
-  return await response.json();
 };
 
-let waitForResponse = async (lat, lon, cityName, apiKey) => {
-  let getData = await linkApi(lat, lon, cityName, apiKey);
-  // set data
-  cityCodeElement.innerText = getData.sys.country;
-  cityNameElement.innerText =
-    getData.name === "Sāmāir" ? "Dhaka" : getData.name;
-  humidityElement.innerText = getData.main.humidity;
-  windElement.innerText = getData.wind.speed;
-  pressureElement.innerText = getData.main.pressure;
-  tempDescriptionElement.innerText = getData.weather[0].description;
-  // celsius to fahrenheit
-  fahrenheitElement.addEventListener("click", function () {
-    feelLikeElement.innerText = Math.round(getData.main.feels_like);
-    mainTemperatureElement.innerText = Math.round(getData.main.temp);
-    // add and remove active class
-    celsiusElement.classList.remove("active");
-    fahrenheitElement.classList.add("active");
-  });
-  // fahrenheit to celsius
-  celsiusElement.addEventListener("click", function () {
-    feelLikeElement.innerText = Math.round(
-      (getData.main.feels_like - 32) * 0.5556
-    );
-    mainTemperatureElement.innerText = Math.round(
-      (getData.main.temp - 32) * 0.5556
-    );
-    // add and remove active class
-    celsiusElement.classList.add("active");
-    fahrenheitElement.classList.remove("active");
-  });
-  feelLikeElement.innerText = Math.round(
-    (getData.main.feels_like - 32) * 0.5556
-  );
-  mainTemperatureElement.innerText = Math.round(
-    (getData.main.temp - 32) * 0.5556
-  );
-  weatherImgElement.setAttribute(
-    "src",
-    `http://openweathermap.org/img/w/${getData.weather[0].icon}.png`
-  );
-};
+// Set time and date
+setInterval(() => {
+  let d = new Date();
+  localDateEl.innerHTML = `${dayList[d.getDay()]} ${monthList[d.getMonth()]} ${String(d.getDate()).padStart(2, "0")} ${d.getFullYear()}`;
+  localTimeEl.innerHTML = `${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")} ${d.getHours() >= 12 ? "PM" : "AM"}`;
+}, 1000);

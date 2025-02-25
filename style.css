@@ -4,42 +4,33 @@ a {
   text-decoration: none;
 }
 
-a:hover, a:active, a:focus{
-  color: rgb(239, 231, 231);
-  text-decoration: none;
+a:hover, a:active, a:focus, .active {
   opacity: 1;
 }
 
-.active {
-  color: rgb(242, 237, 237);
-  text-decoration: none;
-  opacity: 1;
-}
-
-body{
+body {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #3c3737d7;
+  background: #e5ddddd7;
 }
 
 #wrapper {
-  background-color: #2d0e03;
+  background: #2d0e03;
   box-shadow: 1px 5px 25px 3px #dfd4d4;
   border-radius: 10px;
   margin: 100px auto;
   max-width: 720px;
-  padding: 0px;
-  color: white;  
+  color: white;
 }
 
-#current-weather{
+#current-weather {
   padding: 15px;
 }
 
-#mainTemperature{
-  font-size: 5.5em; 
+#mainTemperature {
+  font-size: 5.5em;
   line-height: 0.7;
 }
 
@@ -50,27 +41,27 @@ body{
 
 .day-weather-box {
   border: 1px solid #82bbdd;
-  background-color: #2E7FA1;
+  background: #2E7FA1;
   border-radius: 5px;
   height: 5em;
 }
 
-.day-weather-box p{
+.day-weather-box p {
   margin-bottom: 0;
 }
 
 .side-weather-info {
-  padding: 0px 10px;
+  padding: 0 10px;
 }
 
 .day-weather-inner-box {
   display: inline-flex;
   margin: 14px auto;
-  padding: 0px 5px;
+  padding: 0 5px;
 }
 
 .forecast-main {
-  padding: 0px 0px 0px 30px;
+  padding-left: 30px;
 }
 
 .forecast-icon {
@@ -78,39 +69,40 @@ body{
   margin-left: 5px;
 }
 
-.modal-body p{
+.modal-body p {
   color: #1d0202;
 }
-form{
+
+form {
   position: relative;
 }
-form input{
-  background-color: #720808 !important;
+
+form input {
+  background: #720808 !important;
   border: none !important;
   padding: 20px !important;
-  border-bottom: 2px solid orange !important; 
+  border-bottom: 2px solid orange !important;
   outline: none !important;
   color: rgb(31, 27, 27) !important;
 }
-form input::placeholder{
+
+form input::placeholder, .error::placeholder {
   color: rgb(243, 216, 12) !important;
 }
-form input:focus{
+
+form input:focus {
   box-shadow: none !important;
-  outline: none !important;
 }
-.error::placeholder{
-  color: #f0bb0a !important;
-}
-form button{
-  background-color: transparent;
+
+form button {
+  background: transparent;
   border: none;
 }
 
 form button i {
-    position: absolute;
-    right: 13px;
-    top: 20px;
-    font-size: 24px;
-    color: orange;
+  position: absolute;
+  right: 13px;
+  top: 20px;
+  font-size: 24px;
+  color: orange;
 }
